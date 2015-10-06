@@ -1,12 +1,8 @@
-﻿using HtmlAgilityPack;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BingWallpaper
@@ -15,11 +11,11 @@ namespace BingWallpaper
     {
         public const string BING_URL = "http://www.bing.com";
         public const string STREAM_URL = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
-        
 
         public WebClient WebClient { get; }
 
         public delegate void WallpaperSetHandler();
+
         public event WallpaperSetHandler OnWallpaperSet;
 
         // Field to hold fileName while downloading
@@ -30,16 +26,15 @@ namespace BingWallpaper
             WebClient = new WebClient();
             WebClient.Proxy = WebProxy.GetDefaultProxy();
             WebClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
-
         }
 
         public void GetBackground()
         {
+            Trace.TraceInformation("Requesting site");
 
-            Console.WriteLine("Requesting site");
             string jsonStream = WebClient.DownloadString(STREAM_URL);
 
-            Console.WriteLine("Parsing stream");
+            Trace.TraceInformation("Parsing stream");
             JObject stream = JObject.Parse(jsonStream);
             JArray images = JArray.Parse(stream["images"].ToString());
 
@@ -49,7 +44,7 @@ namespace BingWallpaper
                 imgUrl = image["url"].ToString();
                 break; // only one image for now
             }
-            
+
             Uri imgUri = new Uri(BING_URL + imgUrl);
             Console.WriteLine(imgUrl);
 
@@ -57,7 +52,7 @@ namespace BingWallpaper
             int fileExtensionPoint = imgUrl.LastIndexOf('.') + 1;
             string fileExtension = imgUrl.Substring(fileExtensionPoint);
             string fileName = "bing_background." + fileExtension;
-            
+
             path = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), fileName);
 
             Console.WriteLine(path);
@@ -68,10 +63,10 @@ namespace BingWallpaper
         private void WebClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
         {
             bool exists = File.Exists(path);
-            Console.WriteLine("File exists " + exists);
+            Trace.TraceInformation("File exists " + exists);
             if (exists) Wallpaper.Set(path, Wallpaper.Style.Stretched);
             // Propagate wallpaper set
-            if(OnWallpaperSet != null) OnWallpaperSet();
-        }                
+            if (OnWallpaperSet != null) OnWallpaperSet();
+        }
     }
 }

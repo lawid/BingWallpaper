@@ -1,12 +1,6 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace BingWallpaper
@@ -14,8 +8,8 @@ namespace BingWallpaper
     public partial class BingWallpaperOptions : Form
     {
         private const string STARTUP_ENTRY = "BingWallpaper";
-        RegistryKey startupRegistry = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-        bool startupRegistered;
+        private RegistryKey startupRegistry = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+        private bool startupRegistered;
 
         public BingLoader BingLoader { get; }
 
@@ -24,10 +18,8 @@ namespace BingWallpaper
             InitializeComponent();
             BingLoader = new BingLoader();
             updateStartupButton();
-            BingLoader.WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;            
+            BingLoader.WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
         }
-
-
 
         public void GetWallpaper_Click(object sender, EventArgs e)
         {
@@ -38,6 +30,7 @@ namespace BingWallpaper
             }
             catch (Exception exception)
             {
+                Trace.TraceError(exception.ToString());
                 MessageBox.Show(exception.Message, exception.Source, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -52,7 +45,7 @@ namespace BingWallpaper
         {
             if (startupRegistered)
             {
-                startupRegistry.SetValue(STARTUP_ENTRY, Application.ExecutablePath.ToString()+" "+Program.STARTUP_CMD);
+                startupRegistry.SetValue(STARTUP_ENTRY, Application.ExecutablePath.ToString() + " " + Program.STARTUP_CMD);
             }
             else
             {
@@ -71,6 +64,6 @@ namespace BingWallpaper
             {
                 button1.Text = "Deregister startup";
             }
-        }       
+        }
     }
 }
