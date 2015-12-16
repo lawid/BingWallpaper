@@ -18,12 +18,10 @@ namespace BingWallpaper
             InitializeComponent();
             BingLoader = new BingLoader();
             updateStartupButton();
-            BingLoader.WebClient.DownloadProgressChanged += WebClient_DownloadProgressChanged;
         }
 
         public void GetWallpaper_Click(object sender, EventArgs e)
         {
-            progressBar1.Style = ProgressBarStyle.Continuous;
             try
             {
                 BingLoader.GetBackground();
@@ -31,14 +29,8 @@ namespace BingWallpaper
             catch (Exception exception)
             {
                 Trace.TraceError(exception.ToString());
-                MessageBox.Show(exception.Message, exception.Source, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(exception.ToString(), exception.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void WebClient_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e)
-        {
-            progressBar1.Style = ProgressBarStyle.Continuous;
-            progressBar1.Value = e.ProgressPercentage;
         }
 
         private void startupButton_Click(object sender, EventArgs e)

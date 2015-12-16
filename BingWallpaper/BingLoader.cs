@@ -13,25 +13,16 @@ namespace BingWallpaper
         public const string STREAM_URL = "http://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=en-US";
 
         public WebClient WebClient { get; }
-
-        public delegate void WallpaperSetHandler();
-
-        public event WallpaperSetHandler OnWallpaperSet;
-
-        // Field to hold fileName while downloading
-        private string path;
-
+        
         public BingLoader()
         {
             WebClient = new WebClient();
             WebClient.Proxy = WebProxy.GetDefaultProxy();
-            WebClient.DownloadFileCompleted += WebClient_DownloadFileCompleted;
         }
 
         public void GetBackground()
         {
             Trace.TraceInformation("Requesting site");
-
             string jsonStream = WebClient.DownloadString(STREAM_URL);
 
             Trace.TraceInformation("Parsing stream");
@@ -46,27 +37,18 @@ namespace BingWallpaper
             }
 
             Uri imgUri = new Uri(BING_URL + imgUrl);
-            Console.WriteLine(imgUrl);
 
-            // get extension
-            int fileExtensionPoint = imgUrl.LastIndexOf('.') + 1;
-            string fileExtension = imgUrl.Substring(fileExtensionPoint);
-            string fileName = "bing_background." + fileExtension;
+            int lastSlash = imgUrl.LastIndexOf('/') + 1;
+            string fileName = imgUrl.Substring(lastSlash);
 
-            path = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), fileName);
-
-            Console.WriteLine(path);
-
-            WebClient.DownloadFileAsync(imgUri, fileName);
-        }
-
-        private void WebClient_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
-        {
+            var path = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), fileName);
+            
+            WebClient.DownloadFile(imgUri, path);
+        
             bool exists = File.Exists(path);
-            Trace.TraceInformation("File exists " + exists);
+            Trace.TraceInformation("File: "+path+" exists? " + exists);
+
             if (exists) Wallpaper.Set(path, Wallpaper.Style.Stretched);
-            // Propagate wallpaper set
-            if (OnWallpaperSet != null) OnWallpaperSet();
         }
     }
 }

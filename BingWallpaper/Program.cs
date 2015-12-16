@@ -13,21 +13,26 @@ namespace BingWallpaper
         [STAThread]
         private static void Main(string[] args)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            var form = new BingWallpaperOptions();
-
             if (args.Length > 0 && args[0] == STARTUP_CMD)
             {
-                form.BingLoader.OnWallpaperSet += StartupExitListener;
-                form.GetWallpaper_Click(null, null);
+                try
+                {
+                    var loader = new BingLoader();
+                    loader.GetBackground();
+                }
+                catch (Exception exception)
+                {
+                    MessageBox.Show(exception.ToString(), exception.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                Application.Exit();
             }
-            Application.Run(form);
-        }
-
-        private static void StartupExitListener()
-        {
-            Application.Exit();
+            else
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                var form = new BingWallpaperOptions();
+                Application.Run(form);
+            }
         }
     }
 }
